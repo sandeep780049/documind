@@ -2,9 +2,9 @@
 
 DocuMind is a production-ready **AI knowledge base / document Q&A backend**. It ingests PDF and TXT files, chunks and embeds them into PostgreSQL with pgvector, and answers questions with retrieval-augmented generation (RAG), returning cited sources (document name + page).
 
-- Live demo: https://documind-api.onrender.com
-- API docs (Swagger): https://documind-api.onrender.com/docs
-- Health check: https://documind-api.onrender.com/health
+- Live demo: https://documind-api-2a1i.onrender.com
+- API docs (Swagger): https://documind-api-2a1i.onrender.com/docs
+- Health check: https://documind-api-2a1i.onrender.com/health
 
 ## Features
 
@@ -159,7 +159,7 @@ Base path: `/api/v1`
 Example:
 
 ```bash
-curl -X POST https://documind-api.onrender.com/api/v1/auth/register \
+curl -X POST https://documind-api-2a1i.onrender.com/api/v1/auth/register \
   -H "Content-Type: application/json" \
   -d '{"email":"demo@example.com","password":"strongpassword123"}'
 ```
