@@ -1,0 +1,19 @@
+# Deployed (Render) dependency set.
+# The live instance uses the OpenAI embedding + LLM providers, so the heavy
+# local sentence-transformers / torch stack is intentionally omitted here.
+# Local development and Docker use requirements.txt instead.
+fastapi>=0.115.0,<1.0.0
+uvicorn[standard]>=0.30.0,<1.0.0
+pydantic>=2.9.0,<3.0.0
+pydantic-settings>=2.5.0,<3.0.0
+email-validator>=2.2.0
+sqlalchemy>=2.0.35,<2.1.0
+psycopg[binary]>=3.2.0,<4.0.0
+pgvector>=0.3.0,<1.0.0
+alembic>=1.13.0,<2.0.0
+PyJWT>=2.9.0,<3.0.0
+argon2-cffi>=23.1.0
+PyMuPDF>=1.24.0
+httpx>=0.27.0
+python-multipart>=0.0.9
+slowapi>=0.1.9

@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+.render_key
+uploads/
+.pytest_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+*.db

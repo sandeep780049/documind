@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>DocuMind — AI-Powered Knowledge Retrieval System</title>
+<meta name="description" content="DocuMind is a production-style RAG backend: upload PDF/TXT documents, search them with pgvector, and get grounded answers from a local or hosted LLM." />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>" />
+<style>
+  :root {
+    --bg: #0b1020;
+    --panel: #121a2e;
+    --panel-2: #172038;
+    --border: #263251;
+    --text: #e8ecf6;
+    --muted: #9aa7c2;
+    --accent: #7c9cff;
+    --accent-2: #4ade80;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background:
+      radial-gradient(1100px 500px at 15% -10%, rgba(124,156,255,.18), transparent 60%),
+      radial-gradient(900px 450px at 90% 0%, rgba(74,222,128,.10), transparent 55%),
+      var(--bg);
+    color: var(--text);
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.6;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+  header { border-bottom: 1px solid var(--border); backdrop-filter: blur(8px); position: sticky; top: 0; background: rgba(11,16,32,.82); z-index: 10; }
+  .nav { display: flex; align-items: center; justify-content: space-between; height: 64px; gap: 16px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: .2px; }
+  .logo { width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center; background: linear-gradient(135deg, #7c9cff, #4ade80); color: #06101f; font-weight: 800; }
+  .nav-links { display: flex; gap: 20px; font-size: 14px; }
+  .nav-links a { color: var(--muted); }
+  .nav-links a:hover { color: var(--text); text-decoration: none; }
+  .hero { padding: 76px 0 48px; }
+  .pill { display: inline-flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--accent-2); border: 1px solid rgba(74,222,128,.35); background: rgba(74,222,128,.08); padding: 4px 12px; border-radius: 999px; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent-2); box-shadow: 0 0 10px var(--accent-2); }
+  h1 { font-size: clamp(34px, 5vw, 54px); line-height: 1.08; margin: 20px 0 16px; letter-spacing: -1.2px; }
+  .grad { background: linear-gradient(100deg, #a9bcff, #7c9cff 40%, #4ade80); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .lead { color: var(--muted); font-size: 18px; max-width: 720px; }
+  .cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 11px 18px; border-radius: 10px; font-weight: 600; font-size: 14.5px; border: 1px solid var(--border); }
+  .btn:hover { text-decoration: none; }
+  .btn-primary { background: var(--accent); color: #08122a; border-color: transparent; }
+  .btn-primary:hover { filter: brightness(1.08); }
+  .btn-ghost { color: var(--text); background: var(--panel); }
+  .btn-ghost:hover { background: var(--panel-2); }
+  section { padding: 40px 0; }
+  h2 { font-size: 24px; margin: 0 0 6px; letter-spacing: -.4px; }
+  .sub { color: var(--muted); margin: 0 0 24px; font-size: 15px; }
+  .grid { display: grid; gap: 16px; }
+  .grid-3 { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+  .card { background: linear-gradient(180deg, var(--panel), rgba(18,26,46,.6)); border: 1px solid var(--border); border-radius: 14px; padding: 20px; }
+  .card h3 { margin: 0 0 6px; font-size: 15.5px; }
+  .card p { margin: 0; color: var(--muted); font-size: 14px; }
+  .icon { width: 34px; height: 34px; border-radius: 9px; display: grid; place-items: center; background: rgba(124,156,255,.12); border: 1px solid rgba(124,156,255,.25); margin-bottom: 12px; font-size: 16px; }
+  .pipeline { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
+  .step { background: var(--panel); border: 1px solid var(--border); border-radius: 11px; padding: 14px; font-size: 13px; color: var(--muted); }
+  .step b { display: block; color: var(--text); font-size: 13.5px; margin-bottom: 4px; }
+  .step span { font-family: var(--mono); font-size: 11px; color: var(--accent); }
+  code, pre { font-family: var(--mono); }
+  pre { background: #0a0f1e; border: 1px solid var(--border); border-radius: 12px; padding: 16px; overflow-x: auto; font-size: 13px; line-height: 1.55; }
+  .endpoints { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  .endpoints th, .endpoints td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .endpoints th { color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .6px; }
+  .method { font-family: var(--mono); font-size: 11.5px; font-weight: 700; padding: 2px 7px; border-radius: 5px; }
+  .get { color: #7dd3fc; background: rgba(125,211,252,.12); }
+  .post { color: #86efac; background: rgba(134,239,252,.10); background: rgba(134,239,252,.12); }
+  .del { color: #fca5a5; background: rgba(252,165,165,.12); }
+  .note { border-left: 3px solid var(--accent); background: rgba(124,156,255,.07); padding: 12px 16px; border-radius: 0 10px 10px 0; color: var(--muted); font-size: 14px; }
+  footer { border-top: 1px solid var(--border); margin-top: 40px; padding: 28px 0 40px; color: var(--muted); font-size: 13.5px; display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; }
+  @media (max-width: 640px) { .nav-links { display: none; } .hero { padding-top: 52px; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap nav">
+    <div class="brand"><div class="logo">D</div> DocuMind</div>
+    <nav class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#pipeline">Pipeline</a>
+      <a href="#api">API</a>
+      <a href="/docs">Swagger</a>
+      <a href="https://github.com/sandeep780049/documind">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <span class="pill"><span class="dot"></span> Live API · PostgreSQL + pgvector</span>
+    <h1>Your documents,<br /><span class="grad">answered with evidence.</span></h1>
+    <p class="lead">
+      DocuMind is a production-style Retrieval-Augmented Generation backend. Upload PDF or TXT
+      files, and it extracts, chunks, embeds and indexes them with pgvector — then answers
+      questions strictly from the retrieved context, with page-level citations.
+    </p>
+    <div class="cta">
+      <a class="btn btn-primary" href="/docs">Explore the API →</a>
+      <a class="btn btn-ghost" href="/health">Health status</a>
+      <a class="btn btn-ghost" href="https://github.com/sandeep780049/documind">Source code</a>
+    </div>
+  </section>
+
+  <section id="features">
+    <h2>What it does</h2>
+    <p class="sub">Real backend behaviour — no mock responses, no hardcoded answers.</p>
+    <div class="grid grid-3">
+      <div class="card"><div class="icon">🔐</div><h3>JWT authentication</h3><p>Argon2 password hashing, bearer tokens and per-user isolation on every document, chunk and conversation.</p></div>
+      <div class="card"><div class="icon">📄</div><h3>Document pipeline</h3><p>PyMuPDF extraction, text cleaning, word-boundary chunking with overlap, and processing status tracking.</p></div>
+      <div class="card"><div class="icon">🧠</div><h3>Local embeddings</h3><p>sentence-transformers <code>all-MiniLM-L6-v2</code> by default, with OpenAI and fastembed providers a config change away.</p></div>
+      <div class="card"><div class="icon">🔎</div><h3>pgvector search</h3><p>Cosine-similarity ANN search over an ivfflat index, scoped to the requesting user in SQL.</p></div>
+      <div class="card"><div class="icon">💬</div><h3>Grounded RAG</h3><p>Ollama runs the LLM locally; answers cite document name, page and similarity, and refuse when context is missing.</p></div>
+      <div class="card"><div class="icon">🗂️</div><h3>Conversation history</h3><p>Every question and answer is persisted with its sources, paginated and scoped to the account.</p></div>
+    </div>
+  </section>
+
+  <section id="pipeline">
+    <h2>Retrieval pipeline</h2>
+    <p class="sub">From upload to cited answer in six stages.</p>
+    <div class="pipeline">
+      <div class="step"><b>Upload</b><span>POST /documents/upload</span>Validate type &amp; size</div>
+      <div class="step"><b>Extract</b><span>PyMuPDF</span>Page-aware text</div>
+      <div class="step"><b>Chunk</b><span>900 / 150</span>Clean, overlap, metadata</div>
+      <div class="step"><b>Embed</b><span>MiniLM · 384d</span>Normalised vectors</div>
+      <div class="step"><b>Retrieve</b><span>&lt;=&gt; cosine</span>Top-k for this user</div>
+      <div class="step"><b>Generate</b><span>Ollama</span>Answer + citations</div>
+    </div>
+  </section>
+
+  <section id="api">
+    <h2>REST API</h2>
+    <p class="sub">Versioned under <code>/api/v1</code>. Full schemas in <a href="/docs">Swagger UI</a>.</p>
+    <div class="card" style="padding: 6px 8px;">
+      <table class="endpoints">
+        <thead><tr><th>Method</th><th>Endpoint</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td><span class="method post">POST</span></td><td><code>/api/v1/auth/register</code></td><td>Create an account and receive a JWT</td></tr>
+          <tr><td><span class="method post">POST</span></td><td><code>/api/v1/auth/login</code></td><td>Exchange credentials for a JWT</td></tr>
+          <tr><td><span class="method get">GET</span></td><td><code>/api/v1/auth/me</code></td><td>Current account</td></tr>
+          <tr><td><span class="method post">POST</span></td><td><code>/api/v1/documents/upload</code></td><td>Upload PDF/TXT, process and index</td></tr>
+          <tr><td><span class="method get">GET</span></td><td><code>/api/v1/documents</code></td><td>Paginated document list</td></tr>
+          <tr><td><span class="method get">GET</span></td><td><code>/api/v1/documents/{id}</code></td><td>Document metadata and status</td></tr>
+          <tr><td><span class="method del">DELETE</span></td><td><code>/api/v1/documents/{id}</code></td><td>Delete document and its chunks</td></tr>
+          <tr><td><span class="method post">POST</span></td><td><code>/api/v1/chat/ask</code></td><td>Ask a grounded question</td></tr>
+          <tr><td><span class="method get">GET</span></td><td><code>/api/v1/chat/history</code></td><td>List conversations</td></tr>
+          <tr><td><span class="method get">GET</span></td><td><code>/api/v1/chat/history/{id}</code></td><td>Conversation with messages</td></tr>
+          <tr><td><span class="method del">DELETE</span></td><td><code>/api/v1/chat/history/{id}</code></td><td>Delete a conversation</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Try it in a minute</h2>
+    <p class="sub">The live deployment runs the OpenAI provider; locally DocuMind runs fully offline.</p>
+<pre>BASE=https://documind-api.onrender.com
+
+# 1. Create an account (returns a JWT)
+curl -X POST $BASE/api/v1/auth/register \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"you@example.com","password":"StrongPass123"}'
+
+# 2. Upload a document
+curl -X POST $BASE/api/v1/documents/upload \
+  -H "Authorization: Bearer $TOKEN" \
+  -F 'file=@handbook.pdf'
+
+# 3. Ask a question about it
+curl -X POST $BASE/api/v1/chat/ask \
+  -H "Authorization: Bearer $TOKEN" \
+  -H 'Content-Type: application/json' \
+  -d '{"question":"What is the remote work policy?"}'</pre>
+    <div class="note">
+      The API is rate limited. Register once, reuse the token, and keep the demo
+      questions focused on documents you upload yourself.
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap" style="display:flex; justify-content:space-between; width:100%; flex-wrap:wrap; gap:10px;">
+    <span>DocuMind · FastAPI · PostgreSQL + pgvector · sentence-transformers · Ollama</span>
+    <span><a href="/docs">API docs</a> · <a href="https://github.com/sandeep780049/documind">GitHub</a> · <a href="/health">Health</a></span>
+  </div>
+</footer>
+</body>
+</html>
